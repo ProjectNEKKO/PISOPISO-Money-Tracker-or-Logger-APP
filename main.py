@@ -1,15 +1,14 @@
-"""
-This Python Project is called:
----------------------------------PISO PISO---------------------------------------
+import sys
+from PySide6.QtWidgets import QApplication, QMainWindow
 
-A money tracking/logging app to track income and expenses with categories, maintain a running total, and allow it to export as a .CSV file for Excel, the project will be made with python and pyside for the GUI
+class MainWindow(QMainWindow):
+  def __init__(self):
+    super().__init__()
+    self.setWindowTitle("PisoPiso")
+    self.resize(500, 400)
 
-FEATURES:
-  - Add a new transaction/entry
-  - View all transaction in a table
-  - Show total income, total expenses, and balance
-  - Manually save/export to CSV
-
-Will Probably Delete this comment and save it to READme file in the future.
-
-"""
+if __name__ == "__main__":
+  app = QApplication(sys.argv)
+  window = MainWindow()
+  window.show()
+  sys.exit(app.exec())
