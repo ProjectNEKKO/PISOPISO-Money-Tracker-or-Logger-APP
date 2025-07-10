@@ -52,7 +52,20 @@ class MainWindow(QMainWindow):
     self.main_layout.addWidget(group)
 
   def handle_add(self):
-    pass
+    date = self.date_input.date().toString("yyyy-MM-dd")
+    type_ = self.type_input.currentText()
+    category = self.category_input.currentText()
+    amount = self.amount_input.text()
+    description = self.desc_input.text()
+
+    print("=== New Transaction ===")
+    print(f"Date       : {date}")
+    print(f"Type       : {type_}")
+    print(f"Category   : {category}")
+    print(f"Amount (₱) : {amount}")
+    print(f"Description: {description}")
+
+
 if __name__ == "__main__":
   app = QApplication(sys.argv)
   window = MainWindow()
