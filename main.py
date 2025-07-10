@@ -16,6 +16,7 @@ class MainWindow(QMainWindow):
     self.setCentralWidget(self.central)
     self.main_layout = QVBoxLayout()
     self.central.setLayout(self.main_layout)
+    self.transaction = []
 
     self.build_input_group()
 
@@ -58,13 +59,18 @@ class MainWindow(QMainWindow):
     amount = self.amount_input.text()
     description = self.desc_input.text()
 
-    print("=== New Transaction ===")
-    print(f"Date       : {date}")
-    print(f"Type       : {type_}")
-    print(f"Category   : {category}")
-    print(f"Amount (₱) : {amount}")
-    print(f"Description: {description}")
+    transaction = {
+      "date": date,
+      "type": type_,
+      "category": category,
+      "amount": amount,
+      "description": description,
+    }
 
+    self.transaction.append(transaction)
+
+    print(f"✅ Added: {transaction}")
+    print(f"📊 Total transaction: {len(self.transaction)}")
 
 if __name__ == "__main__":
   app = QApplication(sys.argv)
