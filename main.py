@@ -2,7 +2,7 @@ import sys
 from PySide6.QtWidgets import QApplication, QMainWindow
 from PySide6.QtWidgets import (
   QWidget, QVBoxLayout, QHBoxLayout, QFormLayout, QPushButton, QDateEdit,
-  QComboBox, QLineEdit, QGroupBox
+  QComboBox, QLineEdit, QGroupBox, QTableWidget, QTableWidgetItem, QHeaderView
 )
 from PySide6.QtCore import QDate
 
@@ -19,6 +19,7 @@ class MainWindow(QMainWindow):
     self.transaction = []
 
     self.build_input_group()
+    self.build_transaction_table()
 
   def build_input_group(self):
     group = QGroupBox("Add New Transaction")
@@ -68,9 +69,28 @@ class MainWindow(QMainWindow):
     }
 
     self.transaction.append(transaction)
+    self.update_table()
 
     print(f"✅ Added: {transaction}")
     print(f"📊 Total transaction: {len(self.transaction)}")
+
+  def build_transaction_table(self):
+    self.table = QTableWidget()
+    self.table.setColumnCount(5)
+    self.table.setHorizontalHeaderLabels(["Date", "Type", "Category", "Amount (₱)", "Description"])
+    self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+    self.table.setEditTriggers(QTableWidget.NoEditTriggers)
+    self.main_layout.addWidget(self.table)
+
+  def update_table(self):
+    self.table.setRowCount(len(self.transaction))
+
+    for row, txn in enumerate(self.transaction):
+      self.table.setItem(row, 0, QTableWidgetItem(txn["date"]))
+      self.table.setItem(row, 1, QTableWidgetItem(txn["type"]))
+      self.table.setItem(row, 2, QTableWidgetItem(txn["category"]))
+      self.table.setItem(row, 3, QTableWidgetItem(txn["amount"]))
+      self.table.setItem(row, 4, QTableWidgetItem(txn["description"]))
 
 if __name__ == "__main__":
   app = QApplication(sys.argv)
