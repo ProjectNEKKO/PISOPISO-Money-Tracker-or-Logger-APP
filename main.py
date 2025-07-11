@@ -2,7 +2,8 @@ import sys
 from PySide6.QtWidgets import QApplication, QMainWindow
 from PySide6.QtWidgets import (
   QWidget, QVBoxLayout, QHBoxLayout, QFormLayout, QPushButton, QDateEdit,
-  QComboBox, QLineEdit, QGroupBox, QTableWidget, QTableWidgetItem, QHeaderView
+  QComboBox, QLineEdit, QGroupBox, QTableWidget, QTableWidgetItem, QHeaderView,
+  QLabel
 )
 from PySide6.QtCore import QDate
 
@@ -16,10 +17,11 @@ class MainWindow(QMainWindow):
     self.setCentralWidget(self.central)
     self.main_layout = QVBoxLayout()
     self.central.setLayout(self.main_layout)
-    self.transaction = []
+    self.transactions = []
 
     self.build_input_group()
     self.build_transaction_table()
+    self.build_summary_labels()
 
   def build_input_group(self):
     group = QGroupBox("Add New Transaction")
@@ -68,11 +70,12 @@ class MainWindow(QMainWindow):
       "description": description,
     }
 
-    self.transaction.append(transaction)
+    self.transactions.append(transaction)
     self.update_table()
+    self.update_summary()
 
     print(f"✅ Added: {transaction}")
-    print(f"📊 Total transaction: {len(self.transaction)}")
+    print(f"📊 Total transaction: {len(self.transactions)}")
 
   def build_transaction_table(self):
     self.table = QTableWidget()
@@ -83,14 +86,45 @@ class MainWindow(QMainWindow):
     self.main_layout.addWidget(self.table)
 
   def update_table(self):
-    self.table.setRowCount(len(self.transaction))
+    self.table.setRowCount(len(self.transactions))
 
-    for row, txn in enumerate(self.transaction):
+    for row, txn in enumerate(self.transactions):
       self.table.setItem(row, 0, QTableWidgetItem(txn["date"]))
       self.table.setItem(row, 1, QTableWidgetItem(txn["type"]))
       self.table.setItem(row, 2, QTableWidgetItem(txn["category"]))
       self.table.setItem(row, 3, QTableWidgetItem(txn["amount"]))
       self.table.setItem(row, 4, QTableWidgetItem(txn["description"]))
+
+  def build_summary_labels(self):
+    self.income_label = QLabel("Total Income: ₱0")
+    self.expense_label = QLabel("Total Expense: ₱0")
+    self.balance_label = QLabel("Balance: ₱0")
+
+    self.main_layout.addWidget(self.income_label)
+    self.main_layout.addWidget(self.expense_label)
+    self.main_layout.addWidget(self.balance_label)
+
+  def update_summary(self):
+    income_total = 0
+    expense_total = 0
+
+    for txn in self.transactions:
+      try:
+        amt = float(txn["amount"])
+      except ValueError:
+        amt = 0
+
+      if txn["type"] == "Income":
+        income_total += amt
+      else:
+        expense_total += amt
+
+    balance = income_total - expense_total
+
+    self.income_label.setText(f"Total Income: ₱{income_total:,.2f}")
+    self.expense_label.setText(f"Total Expense: ₱{expense_total:,.2f}")
+    self.balance_label.setText(f"Balance: ₱{balance:,.2f}")
+
 
 if __name__ == "__main__":
   app = QApplication(sys.argv)
