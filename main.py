@@ -13,6 +13,7 @@ class MainWindow(QMainWindow):
     super().__init__()
     self.setWindowTitle("PisoPiso")
     self.resize(600, 500)
+    self.setMinimumSize(600, 500)
 
     self.central = QWidget()
     self.setCentralWidget(self.central)
@@ -80,8 +81,9 @@ class MainWindow(QMainWindow):
     self.update_table()
     self.update_summary()
 
-    print(f"✅ Added: {transaction}")
-    print(f"📊 Total transaction: {len(self.transactions)}")
+    self.amount_input.clear()
+    self.desc_input.clear()
+
 
   def build_transaction_table(self):
     self.table = QTableWidget()
