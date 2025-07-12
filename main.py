@@ -1,4 +1,6 @@
 import sys
+import os
+import csv
 from PySide6.QtWidgets import QApplication, QMainWindow
 from PySide6.QtWidgets import (
   QWidget, QVBoxLayout, QHBoxLayout, QFormLayout, QPushButton, QDateEdit,
@@ -23,11 +25,14 @@ class MainWindow(QMainWindow):
     self.main_layout.setSpacing(15)
 
     self.central.setLayout(self.main_layout)
+    self.csv_file = "transactions.csv"
     self.transactions = []
 
     self.build_input_group()
     self.build_transaction_table()
     self.build_summary_labels()
+
+    self.load_transactions()
 
   def build_input_group(self):
     group = QGroupBox("Add New Transaction")
@@ -78,6 +83,7 @@ class MainWindow(QMainWindow):
     }
 
     self.transactions.append(transaction)
+    self.save_transaction(transaction)
     self.update_table()
     self.update_summary()
 
@@ -152,7 +158,28 @@ class MainWindow(QMainWindow):
     self.expense_label.setText(f"Total Expense: ₱{expense_total:,.2f}")
     self.balance_label.setText(f"Balance: ₱{balance:,.2f}")
 
-    
+  def load_transactions(self):
+    if not os.path.exists(self.csv_file):
+      return
+
+    with open(self.csv_file, mode='r', newline='', encoding='utf-8') as file:
+      reader = csv.DictReader(file)
+      for row in reader:
+        self.transactions.append(row)
+
+    self.update_table()
+    self.update_summary()    
+
+  def save_transaction(self, txn):
+    file_exists = os.path.exists(self.csv_file)
+
+    with open(self.csv_file, mode='a', newline='', encoding='utf-8') as file:
+      writer = csv.DictWriter(file, fieldnames=["date", "type", "category", "amount", "description"])
+      
+      if not file_exists:
+        writer.writeheader()
+      
+      writer.writerow(txn)
 
 if __name__ == "__main__":
   app = QApplication(sys.argv)
