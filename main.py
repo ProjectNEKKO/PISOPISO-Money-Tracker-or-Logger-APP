@@ -6,16 +6,21 @@ from PySide6.QtWidgets import (
   QLabel
 )
 from PySide6.QtCore import QDate
+from PySide6.QtGui import QDoubleValidator
 
 class MainWindow(QMainWindow):
   def __init__(self):
     super().__init__()
     self.setWindowTitle("PisoPiso")
-    self.resize(500, 400)
+    self.resize(600, 500)
 
     self.central = QWidget()
     self.setCentralWidget(self.central)
+
     self.main_layout = QVBoxLayout()
+    self.main_layout.setContentsMargins(15,15,15, 15)
+    self.main_layout.setSpacing(15)
+
     self.central.setLayout(self.main_layout)
     self.transactions = []
 
@@ -37,6 +42,7 @@ class MainWindow(QMainWindow):
     self.category_input.addItems(["Salary","Food", "Bills", "Transport", "Other"])
 
     self.amount_input = QLineEdit()
+    self.amount_input.setValidator(QDoubleValidator(0.00, 9999999.99, 2))
     self.amount_input.setPlaceholderText("Enter amount")
 
     self.desc_input = QLineEdit()
@@ -100,9 +106,12 @@ class MainWindow(QMainWindow):
     self.expense_label = QLabel("Total Expense: ₱0")
     self.balance_label = QLabel("Balance: ₱0")
 
-    self.main_layout.addWidget(self.income_label)
-    self.main_layout.addWidget(self.expense_label)
-    self.main_layout.addWidget(self.balance_label)
+    summary_layout = QHBoxLayout()
+    summary_layout.addWidget(self.income_label)
+    summary_layout.addWidget(self.expense_label)
+    summary_layout.addWidget(self.balance_label)
+
+    self.main_layout.addLayout(summary_layout)
 
   def update_summary(self):
     income_total = 0
@@ -121,10 +130,27 @@ class MainWindow(QMainWindow):
 
     balance = income_total - expense_total
 
+    if balance < 0:
+      self.balance_label.setStyleSheet(
+        "color: red;"
+        "font-weight: bold;"
+      )
+    elif  balance == 0:
+      self.balance_label.setStyleSheet(
+        "color: white;"
+        "font-weight: bold;"
+      )
+    else:
+      self.balance_label.setStyleSheet(
+        "color: green;"
+        "font-weight: bold;"
+      )
+
     self.income_label.setText(f"Total Income: ₱{income_total:,.2f}")
     self.expense_label.setText(f"Total Expense: ₱{expense_total:,.2f}")
     self.balance_label.setText(f"Balance: ₱{balance:,.2f}")
 
+    
 
 if __name__ == "__main__":
   app = QApplication(sys.argv)
