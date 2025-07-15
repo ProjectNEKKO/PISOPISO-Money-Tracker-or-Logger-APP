@@ -1,7 +1,8 @@
 from PySide6.QtWidgets import (
   QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
   QLabel, QLineEdit, QComboBox, QPushButton, QDateEdit,
-  QTableWidget, QTableWidgetItem, QHeaderView, QGroupBox, QFormLayout
+  QTableWidget, QTableWidgetItem, QHeaderView, QGroupBox, QFormLayout,
+  QMessageBox, QFileDialog
 )
 from PySide6.QtCore import QDate
 from PySide6.QtGui import QDoubleValidator
@@ -9,6 +10,7 @@ from PySide6.QtGui import QDoubleValidator
 from data import load_transactions, save_transaction
 from app_state import AppState
 
+import csv
 
 class PisoPisoApp(QMainWindow):
   def __init__(self, state: AppState):
@@ -29,6 +31,11 @@ class PisoPisoApp(QMainWindow):
 
     self.build_input_group()
     self.build_transaction_table()
+
+    self.export_button = QPushButton("⏬ Export as CSV")
+    self.export_button.clicked.connect(self.export_to_csv)
+    self.main_layout.addWidget(self.export_button)
+
     self.build_summary_labels()
 
     self.state.transactions = load_transactions(self.state.csv_file)
@@ -99,8 +106,20 @@ class PisoPisoApp(QMainWindow):
 
 
   def handle_add(self):
-    print("Category is a", type(self.category_input))  # debug
-    print("Selected category:", self.category_input.currentText())
+    amount_text = self.amount_input.text().strip()
+    #category = self.category_input.currentText() if isinstance(self.category_input, QComboBox) else self.category_input.text().strip()
+
+    if not amount_text:
+      QMessageBox.warning(self, "Missing Amount", "Please enter a valid amount.")
+      return
+    
+    try:
+      amount = float(amount_text)
+      if amount <= 0:
+        raise ValueError
+    except ValueError:
+      QMessageBox.warning(self, "Invalid Amount", "Amount must be a positive number.")
+      return
 
     transaction = {
       "date": self.date_input.date().toString("yyyy-MM-dd"),
@@ -118,6 +137,39 @@ class PisoPisoApp(QMainWindow):
 
     self.amount_input.clear()
     self.desc_input.clear()
+
+
+
+  def export_to_csv(self):
+    if not self.state.transactions:
+      QMessageBox.information(self, "No Data", "There are no transactions to export.")
+      return
+    
+    file_path, _ = QFileDialog.getSaveFileName(
+      self,
+      "Export Transaction"
+      "Transactions.csv"
+      "CSV Files (*csv)"
+    )
+
+    if not file_path:
+      return
+    
+    if not file_path.lower().endswith(".csv"):
+      file_path += ".csv"
+    
+    try:
+      with open(file_path, mode='w', newline='', encoding='utf-8') as file:
+        writer = csv.DictWriter(file, fieldnames = ["date", "type", "category", "amount", "description"])
+        writer.writeheader()
+        for txn in self.state.transactions:
+          writer.writerow(txn)
+
+      QMessageBox.information(self, "Export Succesful", f"Transactions saved to:\n{file_path}")
+
+    except Exception as e:
+      QMessageBox.critical(self, "Export Failed", f"An error occured:\n{e}")
+
 
 
 
