@@ -36,6 +36,10 @@ class PisoPisoApp(QMainWindow):
     self.export_button.clicked.connect(self.export_to_csv)
     self.main_layout.addWidget(self.export_button)
 
+    self.remove_button = QPushButton("🗑️ Remove Selected")
+    self.remove_button.clicked.connect(self.remove_selected_transaction)
+    self.main_layout.addWidget(self.remove_button)
+
     self.build_summary_labels()
 
     self.state.transactions = load_transactions(self.state.csv_file)
@@ -170,6 +174,39 @@ class PisoPisoApp(QMainWindow):
     except Exception as e:
       QMessageBox.critical(self, "Export Failed", f"An error occured:\n{e}")
 
+
+
+  def remove_selected_transaction(self):
+    selected = self.table.currentRow()
+
+    if selected == -1:
+      QMessageBox.information(self, "No Selection", "Please select a transaction to remove.")
+      return
+  
+    confirm = QMessageBox.question(
+      self,
+      "Confirm Deletion",
+      "Are you sure you want to delete this transaction?",
+      QMessageBox.Yes | QMessageBox.No 
+    )
+
+    if confirm != QMessageBox.Yes:
+      return
+    
+    del self.state.transactions[selected]
+
+    try:
+      with open(self.state.csv_file, mode = 'w', newline = '', encoding = 'utf-8') as file:
+        writer = csv.DictWriter(file, fieldnames=["date", "type", "category", "amount", "description"])
+        writer.writeheader()
+        for txn in self.state.transactions:
+          writer.writerow(txn)
+    except Exception as e:
+      QMessageBox.critical(self, "Error", f"Failed to update CSV:\n{e}")
+      return
+    
+    self.update_table()
+    self.update_summary()
 
 
 
