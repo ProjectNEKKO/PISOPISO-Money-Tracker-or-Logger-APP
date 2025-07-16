@@ -40,6 +40,10 @@ class PisoPisoApp(QMainWindow):
     self.remove_button.clicked.connect(self.remove_selected_transaction)
     self.main_layout.addWidget(self.remove_button)
 
+    self.clear_button = QPushButton("🧼 Clear All Transaction")
+    self.clear_button.clicked.connect(self.clear_all_transaction)
+    self.main_layout.addWidget(self.clear_button)
+
     self.build_summary_labels()
 
     self.state.transactions = load_transactions(self.state.csv_file)
@@ -111,7 +115,6 @@ class PisoPisoApp(QMainWindow):
 
   def handle_add(self):
     amount_text = self.amount_input.text().strip()
-    #category = self.category_input.currentText() if isinstance(self.category_input, QComboBox) else self.category_input.text().strip()
 
     if not amount_text:
       QMessageBox.warning(self, "Missing Amount", "Please enter a valid amount.")
@@ -210,6 +213,35 @@ class PisoPisoApp(QMainWindow):
 
 
 
+  def clear_all_transaction(self):
+    if not self.state.transactions:
+      QMessageBox.information(self, "Nothing to clear", "There are no transactions to clear.")
+      return
+    
+    confirm = QMessageBox.question(
+      self,
+      "Confirm Clear All",
+      "Are you sure you want to delete ALL transactions?",
+      QMessageBox.Yes | QMessageBox.No
+    )
+
+    if confirm != QMessageBox.Yes:
+      return
+    
+    self.state.transactions.clear()
+
+    try:
+      with open(self.state.csv_file, mode='w', newline='', encoding='utf-8') as file:
+        writer = csv.DictWriter(file, fieldnames=["date", "type", "category", "amount", "description"])
+        writer.writeheader()
+    except Exception as e:
+      QMessageBox.critical(self, "Error", f"Failed to clear CSV\n{e}")
+      return
+    
+    self.update_table()
+    self.update_summary()
+
+
   def update_table(self):
     self.table.setRowCount(len(self.state.transactions))
     for row, txn in enumerate(self.state.transactions):
@@ -218,6 +250,8 @@ class PisoPisoApp(QMainWindow):
       self.table.setItem(row, 2, QTableWidgetItem(txn["category"]))
       self.table.setItem(row, 3, QTableWidgetItem(txn["amount"]))
       self.table.setItem(row, 4, QTableWidgetItem(txn["description"]))
+
+
 
   def update_summary(self):
     income_total = 0
