@@ -34,21 +34,30 @@ class PisoPisoApp(QMainWindow):
     self.build_input_group()
     self.build_transaction_table()
 
-    self.export_button = QPushButton("⏬ Export as CSV")
+    self.export_button = QPushButton("⏬ Export CSV")
     self.export_button.clicked.connect(self.export_to_csv)
-    self.main_layout.addWidget(self.export_button)
 
-    self.remove_button = QPushButton("🗑️ Remove Selected")
+
+    self.remove_button = QPushButton("🗑️ Remove")
     self.remove_button.clicked.connect(self.remove_selected_transaction)
-    self.main_layout.addWidget(self.remove_button)
 
-    self.clear_button = QPushButton("🧼 Clear All Transaction")
+
+    self.clear_button = QPushButton("🧼 Clear All")
     self.clear_button.clicked.connect(self.clear_all_transaction)
-    self.main_layout.addWidget(self.clear_button)
 
-    self.edit_button = QPushButton("✏️ Edit Selected")
+
+    self.edit_button = QPushButton("✏️ Edit")
     self.edit_button.clicked.connect(self.edit_selected_transaction)
-    self.main_layout.addWidget(self.edit_button)
+
+    button_layout = QHBoxLayout()
+    button_layout.setSpacing(10)
+
+    button_layout.addWidget(self.export_button)
+    button_layout.addWidget(self.remove_button)
+    button_layout.addWidget(self.clear_button)
+    button_layout.addWidget(self.edit_button)
+
+    self.main_layout.addLayout(button_layout)
 
     self.build_summary_labels()
 
