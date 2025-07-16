@@ -16,6 +16,8 @@ class PisoPisoApp(QMainWindow):
   def __init__(self, state: AppState):
     super().__init__()
 
+    self.editing_index = None
+
     self.state = state
     self.setWindowTitle("PisoPiso")
     self.setMinimumSize(600, 500)
@@ -43,6 +45,10 @@ class PisoPisoApp(QMainWindow):
     self.clear_button = QPushButton("🧼 Clear All Transaction")
     self.clear_button.clicked.connect(self.clear_all_transaction)
     self.main_layout.addWidget(self.clear_button)
+
+    self.edit_button = QPushButton("✏️ Edit Selected")
+    self.edit_button.clicked.connect(self.edit_selected_transaction)
+    self.main_layout.addWidget(self.edit_button)
 
     self.build_summary_labels()
 
@@ -136,8 +142,22 @@ class PisoPisoApp(QMainWindow):
       "description": self.desc_input.text()
     }
 
-    self.state.transactions.append(transaction)
-    save_transaction(self.state.csv_file, transaction)
+    if self.editing_index is not None:
+      self.state.transactions[self.editing_index] = transaction
+      self.editing_index = None
+      self.add_button.setText("+ Add Transaction")
+    else:
+      self.state.transactions.append(transaction)
+
+    try:
+      with open(self.state.csv_file, mode='w', newline='', encoding='utf-8') as file:
+        writer = csv.DictWriter(file, fieldnames = ["date", "type", "category", "amount", "description"])
+        writer.writeheader()
+        for txn in self.state.transactions:
+          writer.writerow(txn)
+    except Exception as e:
+      QMessageBox.critical(self, "Error", f"Failed to update CSV:\n{e}")
+      return
 
     self.update_table()
     self.update_summary()
@@ -210,6 +230,29 @@ class PisoPisoApp(QMainWindow):
     
     self.update_table()
     self.update_summary()
+
+
+
+  def edit_selected_transaction(self):
+    row = self.table.currentRow()
+    if row == -1:
+      QMessageBox.information(self, "No Selection", "Please select a transaction to edit.")
+      return
+    
+    txn = self.state.transactions[row]
+    self.editing_index = row
+
+    self.date_input.setDate(QDate.fromString(txn["date"], "yyyy-MM-dd"))
+    self.type_input.setCurrentText(txn["type"])
+    if isinstance(self.category_input, QComboBox):
+      self.category_input.setCurrentText(txn["category"])
+    else:
+      self.category_input.setText(txn["category"])
+    self.amount_input.setText(txn["amount"])
+    self.desc_input.setText(txn["description"])
+
+    self.add_button.setText("✅ Update Transaction")
+
 
 
 
