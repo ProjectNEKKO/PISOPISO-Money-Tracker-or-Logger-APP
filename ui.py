@@ -82,7 +82,6 @@ class PisoPisoApp(QMainWindow):
     self.category_input.addItems(["Salary", "Food", "Bills", "Transport", "Other"])
 
     self.amount_input = QLineEdit()
-    self.amount_input.setValidator(QDoubleValidator(0.00, 9999999.99, 2))
     self.amount_input.setPlaceholderText("Enter amount")
 
     self.desc_input = QLineEdit()
@@ -109,6 +108,8 @@ class PisoPisoApp(QMainWindow):
     type_cat_layout.addLayout(category_layout)
 
     form_layout.addRow(type_cat_layout)
+
+    self.amount_input.textChanged.connect(self.format_amount_input)
 
     self.date_input.setFixedWidth(130)
     self.amount_input.setFixedWidth(150)
@@ -179,7 +180,8 @@ class PisoPisoApp(QMainWindow):
 
 
   def handle_add(self):
-    amount_text = self.amount_input.text().strip()
+    amount_text = self.amount_input.text().replace("₱", "").replace(",", "").strip()
+    amount = float(amount_text)
 
     if not amount_text:
       QMessageBox.warning(self, "Missing Amount", "Please enter a valid amount.")
@@ -312,6 +314,34 @@ class PisoPisoApp(QMainWindow):
 
     self.add_button.setText("✅ Update Transaction")
 
+
+
+  def format_amount_input(self):
+    text = self.amount_input.text()
+
+    raw = text.replace("₱", "").replace(",", "")
+
+    if not raw.replace('.', '', 1).isdigit():
+      return
+    
+    cursor_pos = self.amount_input.cursorPosition()
+    num_chars_before = len(text)
+
+    try:
+      value = float(raw)
+      formatted = f"₱{int(value):,}" if '.' not in raw else f"₱{value:,.2f}" 
+
+      self.amount_input.blockSignals(True)
+      self.amount_input.setText(formatted)
+      self.amount_input.blockSignals(False)
+     
+      num_chars_after = len(formatted)
+      delta = num_chars_after - num_chars_before
+      new_cursor_pos = cursor_pos + delta
+      self.amount_input.setCursorPosition(new_cursor_pos)
+
+    except ValueError:
+      pass
 
 
 
