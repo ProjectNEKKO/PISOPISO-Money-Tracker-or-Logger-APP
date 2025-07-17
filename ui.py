@@ -92,8 +92,26 @@ class PisoPisoApp(QMainWindow):
     self.add_button.clicked.connect(self.handle_add)
 
     form_layout.addRow("Date:", self.date_input)
-    form_layout.addRow("Type:", self.type_input)
-    form_layout.addRow("Category:", self.category_input)
+
+    type_layout = QHBoxLayout()
+    type_label = QLabel("Type:")
+    type_label.setFixedWidth(63)
+    type_layout.addWidget(type_label)
+    type_layout.addWidget(self.type_input)
+
+    category_layout = QHBoxLayout()
+    category_label = QLabel("Category:")
+    category_label.setFixedWidth(60)
+    category_layout.addWidget(category_label)
+    category_layout.addWidget(self.category_input)
+
+    type_cat_layout = QHBoxLayout()
+    type_cat_layout.addLayout(type_layout)
+    type_cat_layout.addSpacing(20)
+    type_cat_layout.addLayout(category_layout)
+
+    form_layout.addRow(type_cat_layout)
+
     form_layout.addRow("Amount (₱):", self.amount_input)
     form_layout.addRow("Description:", self.desc_input)
     form_layout.addRow("", self.add_button)
