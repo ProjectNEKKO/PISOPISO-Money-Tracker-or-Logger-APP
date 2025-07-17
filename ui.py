@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (
   QTableWidget, QTableWidgetItem, QHeaderView, QGroupBox, QFormLayout,
   QMessageBox, QFileDialog
 )
-from PySide6.QtCore import QDate
+from PySide6.QtCore import (QDate, Qt)
 from PySide6.QtGui import QDoubleValidator
 
 from data import load_transactions, save_transaction
@@ -91,8 +91,6 @@ class PisoPisoApp(QMainWindow):
     self.add_button = QPushButton("+ Add Transaction")
     self.add_button.clicked.connect(self.handle_add)
 
-    form_layout.addRow("Date:", self.date_input)
-
     type_layout = QHBoxLayout()
     type_label = QLabel("Type:")
     type_label.setFixedWidth(63)
@@ -112,8 +110,32 @@ class PisoPisoApp(QMainWindow):
 
     form_layout.addRow(type_cat_layout)
 
-    form_layout.addRow("Amount (₱):", self.amount_input)
-    form_layout.addRow("Description:", self.desc_input)
+    self.date_input.setFixedWidth(130)
+    self.amount_input.setFixedWidth(150)
+    self.desc_input.setMinimumWidth(200)
+
+    row1 = QHBoxLayout()
+
+    date_label = QLabel("Date:")
+    date_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+    row1.addWidget(date_label)
+    row1.addWidget(self.date_input)
+
+    row1.addSpacing(10)
+
+    amount_label = QLabel("Amount:")
+    amount_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+    row1.addWidget(amount_label)
+    row1.addWidget(self.amount_input)
+
+    row1.addSpacing(10)
+
+    desc_label = QLabel("Description:")
+    desc_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+    row1.addWidget(desc_label)
+    row1.addWidget(self.desc_input)
+
+    form_layout.addRow(row1)
     form_layout.addRow("", self.add_button)
 
     group.setLayout(form_layout)
