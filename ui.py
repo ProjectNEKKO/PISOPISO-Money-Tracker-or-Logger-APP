@@ -118,8 +118,18 @@ class PisoPisoApp(QMainWindow):
     self.expense_label = QLabel("Total Expense: ₱0.00")
     self.balance_label = QLabel("Balance: ₱0.00")
 
+    font = self.income_label.font()
+    font.setPointSize(10)
+    font.setBold(True)
+
+    self.income_label.setFont(font)
+    self.expense_label.setFont(font)
+    self.balance_label.setFont(font)
+
     summary_layout = QHBoxLayout()
     summary_layout.setSpacing(30)
+
+    summary_layout.addStretch()
     summary_layout.addWidget(self.income_label)
     summary_layout.addWidget(self.expense_label)
     summary_layout.addWidget(self.balance_label)
