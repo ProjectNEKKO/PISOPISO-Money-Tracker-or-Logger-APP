@@ -146,6 +146,7 @@ class PisoPisoApp(QMainWindow):
 
   def build_transaction_table(self):
     self.table = QTableWidget()
+    self.table.setAlternatingRowColors(True)
     self.table.setColumnCount(5)
     self.table.setHorizontalHeaderLabels(["Date", "Type", "Category", "Amount (₱)", "Description"])
     self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
