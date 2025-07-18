@@ -318,23 +318,30 @@ class PisoPisoApp(QMainWindow):
 
   def format_amount_input(self):
     text = self.amount_input.text()
-
     raw = text.replace("₱", "").replace(",", "")
 
-    if not raw.replace('.', '', 1).isdigit():
-      return
+
+    if not raw or not any(c.isdigit() for c in raw):
+      return 
     
     cursor_pos = self.amount_input.cursorPosition()
     num_chars_before = len(text)
 
     try:
-      value = float(raw)
-      formatted = f"₱{int(value):,}" if '.' not in raw else f"₱{value:,.2f}" 
+      if '.' in raw:
+        parts = raw.split('.')
+        integer_part = int(parts[0]) if parts[0] else 0
+        decimal_part = parts[1][:2]  
+        formatted = f"₱{integer_part:,}.{decimal_part}"
+      else:
+        integer_part = int(raw)
+        formatted = f"₱{integer_part:,}"
 
       self.amount_input.blockSignals(True)
       self.amount_input.setText(formatted)
       self.amount_input.blockSignals(False)
-     
+
+      
       num_chars_after = len(formatted)
       delta = num_chars_after - num_chars_before
       new_cursor_pos = cursor_pos + delta
@@ -390,10 +397,12 @@ class PisoPisoApp(QMainWindow):
     expense_total = 0
 
     for txn in self.state.transactions:
+      raw = txn["amount"]
+      cleaned = raw.replace("₱", "").replace(",", "").strip()
       try:
-        amt = float(txn["amount"])
+        amt = float(cleaned)
       except ValueError:
-        amt = 0
+        continue
 
       if txn["type"] == "Income":
         income_total += amt
